@@ -1,0 +1,25 @@
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connection-test-query: SELECT 1
+      minimum-idle: 1
+      maximum-pool-size: 10
+      pool-name: ${spring.application.name}-pool
+    username: user
+    password: 1111
+    url: jdbc:postgresql://localhost:5432/postgres
+  application:
+    name: userhistory
+
+server:
+  port: 8080
+
+jwt:
+  sessionTime: 120000000
+  secret: secret_key
