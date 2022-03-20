@@ -21,7 +21,7 @@
 
 ### собрать приложение 
 
-    gradle clean package
+    mvn clean package
   
 ### запуск тестов     
     
