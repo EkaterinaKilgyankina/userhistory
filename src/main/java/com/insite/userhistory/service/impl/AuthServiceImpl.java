@@ -3,13 +3,13 @@ package com.insite.userhistory.service.impl;
 import com.insite.userhistory.dto.ClientDto;
 import com.insite.userhistory.dto.TokenDto;
 import com.insite.userhistory.exception.NotFoundException;
+import com.insite.userhistory.exception.PermissionDeniedException;
 import com.insite.userhistory.model.Client;
+import com.insite.userhistory.repository.ClientRepository;
+import com.insite.userhistory.service.AuthService;
 import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.insite.userhistory.repository.ClientRepository;
-import com.insite.userhistory.service.AuthService;
-
 import java.util.Objects;
 
 @Service
@@ -33,7 +33,7 @@ class AuthServiceImpl implements AuthService {
         Claims claims = jwtComponent.decodeJWT(token);
         String subject = claims.getSubject();
         if (!Objects.equals(subject, userName)) {
-            throw new NotFoundException();
+            throw new PermissionDeniedException();
         }
     }
 }

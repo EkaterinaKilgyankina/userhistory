@@ -18,12 +18,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//@Sql(
-//        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,
-//        scripts = "classpath:/sql/reset_tables.sql",
-//        config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 public class ClientControllerTest {
-
     @DynamicPropertySource
     public static void properties(final DynamicPropertyRegistry registry) {
         PostgresContainer.properties(registry);
@@ -43,10 +38,10 @@ public class ClientControllerTest {
                 .setPassword("testSecret1!");
 
         //when
-        Client client = testRestTemplate.postForObject("/registrations", userDto, Client.class);
+        ClientDto clientDto = testRestTemplate.postForObject("/registrations", userDto, ClientDto.class);
 
         //then
-        assertThat(client)
+        assertThat(clientDto)
                 .matches(e -> e.getName().equals(userDto.getName()))
                 .matches(e -> !e.getPassword().isEmpty());
     }
@@ -55,59 +50,20 @@ public class ClientControllerTest {
     void whenCreateUserExistsThenThrowExc() {
         //given
         Client client = new Client()
-                .setName("testUser")
-                .setPassword("testSecret1!");
+                .setName("testUser2")
+                .setPassword("testSecret21!");
         repository.save(client);
 
         ClientDto userDto = new ClientDto()
-                .setName("testUser")
-                .setPassword("testSecret1!");
-
+                .setName("testUser2")
+                .setPassword("testSecret21!");
         //when
         ResponseEntity<ErrorMessage> response = testRestTemplate
                 .postForEntity("/registrations", userDto, ErrorMessage.class);
-
         //then
         Assertions.assertThat(response)
                 .matches(e -> e.getStatusCodeValue() == 400)
                 .extracting(HttpEntity::getBody)
                 .matches(e -> e.getMessage().equals("object already exists"));
     }
-
-//
-//    @Test
-//    void whenCreateClientAndPasswordIsNotValidThrowExc() {
-//        //given
-//        ClientDto userDto = new ClientDto()
-//                .setName("testUser")
-//                .setPassword("testSecret");
-//
-//        //when
-//        ResponseEntity<ErrorMessage> response = testRestTemplate
-//                .postForEntity("/registrations", userDto, ErrorMessage.class);
-//
-//        //then
-//        Assertions.assertThat(response)
-//                .matches(e -> e.getStatusCodeValue() == 400)
-//                .extracting(HttpEntity::getBody)
-//                .matches(e -> e.getMessage()
-//                        .equals("password must contain letters (upper and lower case), digits and special symbols"));
-//    }
-
-//    @Test
-//    void whenCreateClientAndNameIsMissingThrowExc() {
-//        //given
-//        ClientDto clientDto = new ClientDto()
-//                .setPassword("testSecret31!");
-//
-//        //when
-//        ResponseEntity<ErrorMessage> response = testRestTemplate
-//                .postForEntity("/registrations", clientDto, ErrorMessage.class);
-//
-//        //then
-//        Assertions.assertThat(response)
-//                .matches(e -> e.getStatusCodeValue() == 400)
-//                .extracting(HttpEntity::getBody)
-//                .matches(e -> e.getMessage().equals("name is mandatory"));
-//    }
 }

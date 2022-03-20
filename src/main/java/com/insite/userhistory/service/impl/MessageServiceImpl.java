@@ -22,7 +22,6 @@ public class MessageServiceImpl implements MessageService {
     private final AuthServiceImpl authService;
     private final ClientRepository userRepository;
     private final MessageRepository messageRepository;
-    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public List<String> addMessage(String auth, MessageDto messageDto) {

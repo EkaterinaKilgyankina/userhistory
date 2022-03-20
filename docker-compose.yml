@@ -1,0 +1,19 @@
+version: '3.4'
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "password"
+
+  userhistory:
+    image: userhistory
+    ports:
+      - "8080:8080"
+    environment:
+      - "JAVA_OPTS=-Dspring.datasource.url=jdbc:postgresql://userhistory_db_1:5432/postgres
+      -Dspring.datasource.username=admin
+      -Dspring.datasource.password=password
+      -Dserver.port=8080"

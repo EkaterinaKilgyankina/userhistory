@@ -16,6 +16,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column
     long clientId;
 
     @Column(name = "text")

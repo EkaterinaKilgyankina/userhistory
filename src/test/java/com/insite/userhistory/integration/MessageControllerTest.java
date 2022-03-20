@@ -23,14 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//TODO очистка базы - нужна ли??
-//@Sql(
-//        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,
-//        scripts = "classpath:/sql/reset_tables.sql",
-//        config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 public class MessageControllerTest {
-
-
     @DynamicPropertySource
     public static void properties(final DynamicPropertyRegistry registry) {
         PostgresContainer.properties(registry);
@@ -52,8 +45,8 @@ public class MessageControllerTest {
     void whenSendAMessageAndClientExistThanStatusIsCreated() {
         //given
         Client client = new Client()
-                .setName("testClient")
-                .setPassword("testSecret1!");
+                .setName("testClient4")
+                .setPassword("testSecret41!");
         clientRepository.save(client);
 
         String token = "Bearer " + jwtComponent.createJWT(client.getName());
@@ -67,32 +60,56 @@ public class MessageControllerTest {
         headers.add("Authorization", token);
 
         HttpEntity<MessageDto> httpEntity = new HttpEntity<>(messageDto, headers);
-
         //when
         ResponseEntity<Object> response = restTemplate.postForEntity("/messages", httpEntity, null);
-
         //then
         Assertions.assertThat(response)
                 .matches(e->e.getStatusCode().equals(HttpStatus.CREATED));
     }
 
     @Test
-    //TODO если он уже авторизовался через токен - как его может не быть в базе?
     void whenSendAMessageAndClientNotExistThanThrowExc() {
+        //given
         MessageDto messageDto = new MessageDto()
                 .setUserName("noneExistClient")
                 .setText("testText");
 
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-//        headers.add("Authorization", token);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + jwtComponent.createJWT("noneExistClient"));
 
-//        HttpEntity<MessageDto> httpEntity = new HttpEntity<>(messageDto, headers);
+        HttpEntity<MessageDto> httpEntity = new HttpEntity<>(messageDto, headers);
+        //when
+        ResponseEntity<ErrorMessage> response = restTemplate.postForEntity("/messages", httpEntity, ErrorMessage.class);
+        //then
+        Assertions.assertThat(response)
+                .matches(e->e.getStatusCode().equals(HttpStatus.NOT_FOUND))
+                .matches(e -> e.getBody().getMessage().equals("object not found"));
+    }
 
-//        ResponseEntity<Object> response = restTemplate.postForEntity("/messages", httpEntity, null);
-//
-//        Assertions.assertThat(response)
-//                .matches(e->e.getStatusCode().equals(HttpStatus.CREATED));
+    @Test
+    void whenSendAMessageAndTokenIsNotValidThanThrowExc() {
+        //given
+        Client client = new Client()
+                .setName("testClient5")
+                .setPassword("testSecret51!");
+        clientRepository.save(client);
+
+        MessageDto messageDto = new MessageDto()
+                .setUserName("testClient5")
+                .setText("testSecret51!");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.add("Authorization", "Bearer " + jwtComponent.createJWT("NonCorrectName"));
+
+        HttpEntity<MessageDto> httpEntity = new HttpEntity<>(messageDto, headers);
+        //when
+        ResponseEntity<ErrorMessage> response = restTemplate.postForEntity("/messages", httpEntity, ErrorMessage.class);
+        //then
+        Assertions.assertThat(response)
+                .matches(e->e.getStatusCode().equals(HttpStatus.FORBIDDEN))
+                .matches(e -> e.getBody().getMessage().equals("permission denied, token or name is not valid"));
     }
 
     @Test
@@ -126,10 +143,8 @@ public class MessageControllerTest {
 
         HttpEntity<MessageDto> httpEntity = new HttpEntity<>(messageDto, headers);
         List<String> messages = new ArrayList<>();
-
         //when
         ObjectforMessages responseObject = restTemplate.postForObject("/messages", httpEntity, ObjectforMessages.class);
-
         //then
         Assertions.assertThat(responseObject)
                 .matches(e->e.getMessages().size() == 2)
@@ -150,10 +165,8 @@ public class MessageControllerTest {
         headers.add("Authorization", token);
 
         HttpEntity<MessageDto> httpEntity = new HttpEntity<>(messageDto, headers);
-
         //when
         ResponseEntity<ErrorMessage> response = restTemplate.postForEntity("/messages", httpEntity, ErrorMessage.class);
-
         //then
         Assertions.assertThat(response)
                 .matches(e -> e.getStatusCodeValue() == 400)
@@ -174,10 +187,8 @@ public class MessageControllerTest {
         headers.add("Authorization", token);
 
         HttpEntity<MessageDto> httpEntity = new HttpEntity<>(messageDto, headers);
-
         //when
         ResponseEntity<ErrorMessage> response = restTemplate.postForEntity("/messages", httpEntity, ErrorMessage.class);
-
         //then
         Assertions.assertThat(response)
                 .matches(e -> e.getStatusCodeValue() == 400)

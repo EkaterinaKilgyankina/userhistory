@@ -24,6 +24,7 @@ public class ClientServiceImpl implements ClientService {
         Client userNew = new Client();
         userNew.setPassword(passwordEncoder.encode(clientDto.getPassword()));
         userNew.setName(clientDto.getName());
+
         return userRepository.save(userNew);
     }
 }

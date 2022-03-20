@@ -9,23 +9,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 public class RestResponseExceptionHandler extends ResponseEntityExceptionHandler {
-
-
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleExceptions(NotFoundException ex) {
         return ResponseEntity.status(NOT_FOUND).body(new ErrorMessage(ex.getMessage()));
+    }
+
+    @ExceptionHandler(PermissionDeniedException.class)
+    public ResponseEntity<Object> handleExceptions(PermissionDeniedException ex) {
+        return ResponseEntity.status(FORBIDDEN).body(new ErrorMessage(ex.getMessage()));
     }
 
     @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<Object> handleExceptions(AlreadyExistsException ex) {
         return ResponseEntity.status(BAD_REQUEST).body(new ErrorMessage(ex.getMessage()));
     }
-
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
