@@ -19,14 +19,6 @@
     JUnit
     TestRestTemplate
 
-### собрать приложение 
-
-    mvn clean package
-  
-### запуск тестов     
-    
-    mvn clean test
-
 ### запуск приложения
 Скачать файл docker-compose.yaml
 Выполнить команду для запуска образов
